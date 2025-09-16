@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Simple NFC Reader</title>
+</head>
+<body>
+  <h1>Simple NFC Reader</h1>
+  <button id="start">Start Scan</button>
+  <pre id="output">No scans yet.</pre>
+
+  <script>
+    const output = document.getElementById("output");
+    const startBtn = document.getElementById("start");
+
+    startBtn.addEventListener("click", async () => {
+      if (!("NDEFReader" in window)) {
+        output.textContent = "❌ Web NFC is not supported on this device/browser.";
+        return;
+      }
+
+      try {
+        const reader = new NDEFReader();
+        await reader.scan();
+        output.textContent = "✅ Scan started. Hold a tag near the device...";
+
+        reader.onreading = event => {
+          const { serialNumber, message } = event;
+          let text = `Tag serial: ${serialNumber || "unknown"}\n`;
+
+          for (const record of message.records) {
+            text += `- Record type: ${record.recordType}\n`;
+            if (record.recordType === "text") {
+              text += `  Text: ${new TextDecoder().decode(record.data)}\n`;
+            } else if (record.recordType === "url") {
+              text += `  URL: ${new TextDecoder().decode(record.data)}\n`;
+            } else {
+              text += "  (Unsupported record type)\n";
+            }
+          }
+
+          output.textContent = text;
+        };
+
+        reader.onreadingerror = () => {
+          output.textContent = "⚠️ Error reading tag.";
+        };
+
+      } catch (err) {
+        output.textContent = "❌ " + err;
+      }
+    });
+  </script>
+</body>
+</html>

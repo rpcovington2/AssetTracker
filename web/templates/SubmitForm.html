@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>New Record — Dark Form</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#0f1720;
+      --muted:#9aa4b2;
+      --accent:#7c5cff;
+      --accent-2:#00d4ff;
+      --glass: rgba(255,255,255,0.03);
+      --success: #2bd67f;
+      --danger:#ff6b6b;
+      --radius:14px;
+      --input-h:44px;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(124,92,255,0.08), transparent 8%),
+        radial-gradient(1000px 500px at 90% 90%, rgba(0,212,255,0.04), transparent 10%),
+        var(--bg);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:32px;
+      box-sizing:border-box;
+    }
+
+    .wrap{
+      max-width:960px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:28px;
+      align-items:start;
+    }
+
+    @media (max-width:880px){
+      .wrap{ grid-template-columns: 1fr; padding:0 12px; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:22px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.7), inset 0 1px 0 rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    header.title{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+
+    .logo {
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 6px 18px rgba(124,92,255,0.12);
+      flex:0 0 56px;
+    }
+    .logo svg { width:30px; height:30px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45)); }
+
+    h1{ font-size:18px; margin:0; letter-spacing: -0.2px; }
+    p.lead{ margin:2px 0 0; color:var(--muted); font-size:13px; }
+
+    form .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:8px;
+    }
+    @media (max-width:520px){ form .grid{ grid-template-columns: 1fr; } }
+
+    label.field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    input[type="text"], input[type="email"], textarea, select {
+      height:var(--input-h);
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.01));
+      color:inherit;
+      outline:none;
+      box-shadow: 0 3px 10px rgba(2,6,23,0.5) inset;
+      transition: box-shadow .15s, transform .05s, border-color .12s;
+      font-size:14px;
+    }
+
+    textarea { min-height:110px; resize:vertical; padding-top:10px; }
+
+    input:focus, textarea:focus {
+      border-color: rgba(124,92,255,0.9);
+      box-shadow: 0 8px 30px rgba(124,92,255,0.06);
+      transform: translateY(-1px);
+    }
+
+    .row { display:flex; gap:12px; align-items:center; }
+
+    .hint { font-size:12px; color:var(--muted); margin-top:8px; }
+
+    .actions {
+      display:flex;
+      gap:12px;
+      margin-top:18px;
+      align-items:center;
+    }
+
+    button.primary {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+      padding:10px 16px;
+      border-radius:10px;
+      font-weight:600;
+      cursor:pointer;
+      min-height:44px;
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      box-shadow: 0 10px 30px rgba(124,92,255,0.12);
+    }
+
+    button.ghost {
+      background:transparent;
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,0.03);
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      min-height:44px;
+    }
+
+    .status {
+      margin-left:auto;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .message {
+      margin-top:12px;
+      padding:12px;
+      border-radius:10px;
+      font-size:14px;
+      display:none;
+    }
+    .message.show { display:block; }
+    .message.success { background: rgba(43,214,127,0.08); color:var(--success); border:1px solid rgba(43,214,127,0.12); }
+    .message.error { background: rgba(255,107,107,0.06); color:var(--danger); border:1px solid rgba(255,107,107,0.08); }
+
+    .meta {
+      color:var(--muted);
+      font-size:13px;
+      margin-top:6px;
+      line-height:1.4;
+    }
+
+    /* small helper */
+    .small { font-size:13px; color:var(--muted); }
+
+    /* spinner */
+    .spinner {
+      width:16px;
+      height:16px;
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,0.12);
+      border-top-color: white;
+      animation: spin 0.9s linear infinite;
+      display:inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* side preview card */
+    .preview {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .preview .card.preview-inner{
+      padding:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.017), rgba(255,255,255,0.01));
+      border-radius:12px;
+    }
+    .preview .row .label { color:var(--muted); font-size:13px; }
+    .preview .value { color:#eaf4ff; font-weight:600; margin-top:6px; word-break:break-word; }
+
+    footer.note { margin-top:12px; color:var(--muted); font-size:13px; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <header class="title">
+        <div class="logo" aria-hidden="true">
+          <!-- small icon -->
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M4 12h16" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+            <path d="M7 7h10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+            <path d="M7 17h10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+          </svg>
+        </div>
+        <div>
+          <h1>New Database Record</h1>
+          <p class="lead">Add a new entry quickly — fields validated and posted as JSON to your API.</p>
+        </div>
+      </header>
+
+      <form id="newForm" autocomplete="on" novalidate>
+        <div class="grid">
+          <label class="field">
+            <span>Asset Tag<span style="color:var(--danger)">*</span></span>
+            <input id="name" name="name" type="text" placeholder="{{ uid }}" value="{{ uid }}" required />
+          </label>
+
+          <label class="field">
+            <span>Location <span style="color:var(--danger)">*</span></span>
+            <input id="email" name="email" type="text" placeholder="3AX-ECM" required />
+          </label>
+
+          <label class="field">
+            <span>Phone</span>
+            <input id="phone" name="phone" type="text" inputmode="text" placeholder="" />
+          </label>
+
+          <label class="field">
+            <span>Device</span>
+            <input id="device" name="device" type="text" placeholder="Raspberry Pi Zero 2 W" />
+          </label>
+
+          <label class="field">
+            <span>Serial / ID</span>
+            <input id="serial" name="serial" type="text" placeholder="SN-00001234" />
+          </label>
+
+          <label class="field">
+            <span>Type</span>
+            <select id="category" name="category" style="height:var(--input-h);">
+              <option value="">— Select —</option>
+              <option>Physical</option>
+              <option>Electronic</option>
+              <option>Halloween</option>
+              <option>Christmas</option>
+              <option>Misc</option>
+<!--              <option>Maintenance</option>-->
+            </select>
+          </label>
+        </div>
+
+        <label class="field" style="margin-top:12px;">
+          <span>Description</span>
+          <textarea id="notes" name="notes" placeholder="Any additional details..."></textarea>
+        </label>
+
+        <div class="actions" style="margin-top:8px;">
+          <button type="submit" class="primary" id="submitBtn">
+            <span id="btnIcon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span id="btnText">Create</span>
+          </button>
+
+          <button type="button" class="ghost" id="clearBtn">Clear</button>
+
+          <div class="status small" aria-live="polite" id="status">Ready</div>
+        </div>
+
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+
+<!--        <div class="hint meta">-->
+<!--          Tip: Change the server URL inside the JavaScript `API_ENDPOINT` variable if you move your Flask server.-->
+<!--        </div>-->
+      </form>
+    </section>
+
+    <aside class="preview">
+      <div class="card preview-inner">
+        <div class="small">Preview</div>
+        <div style="height:10px"></div>
+        <div class="row">
+          <div style="flex:1">
+            <div class="label">Name</div>
+            <div id="pv-name" class="value">—</div>
+          </div>
+          <div style="flex:1">
+            <div class="label">Location</div>
+            <div id="pv-email" class="value">—</div>
+          </div>
+        </div>
+
+        <div style="height:8px"></div>
+
+<!--        <div class="row">-->
+<!--          <div style="flex:1">-->
+<!--            <div class="label">Device</div>-->
+<!--            <div id="pv-device" class="value">—</div>-->
+<!--          </div>-->
+<!--          <div style="flex:1">-->
+<!--            <div class="label">Serial</div>-->
+<!--            <div id="pv-serial" class="value">—</div>-->
+<!--          </div>-->
+<!--        </div>-->
+
+        <div style="height:12px"></div>
+        <div>
+          <div class="label">Description</div>
+          <div id="pv-notes" class="value" style="font-weight:400; color:var(--muted); min-height:56px;">—</div>
+        </div>
+      </div>
+
+      <div class="card small" style="padding:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:600">Config</div>
+          <div style="font-size:12px;color:var(--muted)">Editable</div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="small">API endpoint:</div>
+        <div id="apiDisplay" class="small" style="color:var(--accent); word-break:break-all; margin-top:6px;">http://localhost:5000/api/new</div>
+      </div>
+
+<!--      <footer class="note">Fields are sent as JSON (application/json). Adjust the script below if your server expects form-encoded data.</footer>-->
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * CONFIG: change this to your Flask server endpoint (POST).
+     * Examples:
+     *  - Local Flask on same device: "http://localhost:5000/api/new"
+     *  - Remote device: "http://192.168.68.52:9000/checktag"
+     */
+    const API_ENDPOINT = "http://192.168.68.52:9000/submit_tag";
+
+    // Elements
+    const form = document.getElementById('newForm');
+    const status = document.getElementById('status');
+    const msg = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnIcon = document.getElementById('btnIcon');
+    const apiDisplay = document.getElementById('apiDisplay');
+
+    // Preview elements
+    const pv = {
+      name: document.getElementById('pv-name'),
+      email: document.getElementById('pv-email'),
+      device: document.getElementById('pv-device'),
+      serial: document.getElementById('pv-serial'),
+      notes: document.getElementById('pv-notes'),
+    };
+
+    apiDisplay.textContent = API_ENDPOINT;
+
+    // small helper to show spinner
+    function setLoading(loading){
+      if(loading){
+        btnIcon.innerHTML = '<span class="spinner" aria-hidden="true"></span>';
+        btnText.textContent = 'Saving...';
+        submitBtn.disabled = true;
+        status.textContent = 'Sending...';
+      } else {
+        btnIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        btnText.textContent = 'Create';
+        submitBtn.disabled = false;
+        status.textContent = 'Ready';
+      }
+    }
+
+    // Update live preview
+    function updatePreview() {
+      pv.name.textContent = document.getElementById('name').value || '—';
+      pv.email.textContent = document.getElementById('email').value || '—';
+      pv.notes.textContent = document.getElementById('notes').value || '—';
+    }
+
+    // Attach preview listeners
+    ['name','email','notes'].forEach(id=>{
+      const el = document.getElementById(id);
+      el.addEventListener('input', updatePreview);
+    });
+
+    // Clear button
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      form.reset();
+      updatePreview();
+      msg.className = 'message';
+      msg.textContent = '';
+      status.textContent = 'Cleared';
+    });
+
+    // Show message
+    function showMessage(type, text){
+      msg.className = 'message show ' + (type === 'success' ? 'success' : 'error');
+      msg.textContent = text;
+    }
+
+    // Validate minimal fields
+    function validate(data){
+      if(!data.name || data.name.trim().length < 2) return "Please provide a valid name.";
+      if(!data.email) return "Please provide a Description.";
+      return null;
+    }
+
+    // Submit handler
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      msg.className = 'message'; msg.textContent = '';
+      window.location.href = `/api/assets`;
+
+      // gather data
+      const payload = {
+        name: (document.getElementById('name').value || '').trim(),
+        email: (document.getElementById('email').value || '').trim(),
+        category: (document.getElementById('category').value || '').trim(),
+        notes: (document.getElementById('notes').value || '').trim(),
+        created_at: new Date().toISOString()
+      };
+
+      // client validation
+      const invalid = validate(payload);
+      if(invalid){
+        showMessage('error', invalid);
+        status.textContent = 'Validation error';
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if(!res.ok){
+          // try parse body for error
+          let txt = `${res.status} ${res.statusText}`;
+          try {
+            const body = await res.json();
+            if(body && body.error) txt = body.error;
+            else if(body && body.message) txt = body.message;
+          } catch(e){}
+          throw new Error(txt);
+        }
+
+        const data = await res.json().catch(()=>({}));
+        showMessage('success', data.message || 'Record created successfully.');
+        status.textContent = 'Saved';
+        form.reset();
+        updatePreview();
+
+      } catch (err){
+        console.error('Submit error', err);
+        showMessage('error', 'Failed to save: ' + (err.message || 'Network error'));
+        status.textContent = 'Error';
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // initialize preview
+    updatePreview();
+  </script>
+</body>
+</html>
