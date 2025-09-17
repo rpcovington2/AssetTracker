@@ -82,7 +82,7 @@ def Install():
     run(f"pip3 install -r C:\\Users\\rpcov\\PycharmProjects\\InventoryManagment\\requirements.txt")
 
 
-def CreateTable(db_name="X:\\Scripts\\NFCServer\\web\\warehouse.db"):
+def CreateTable(db_name="/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"):
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
     # Table: General assets (machines, tools, etc.)
