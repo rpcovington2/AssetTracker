@@ -1,5 +1,7 @@
 import json
 import locale
+import time
+
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
 from web.models import *
@@ -50,6 +52,7 @@ def reportIssue():
 
 @views.route("/checktag", methods=["GET", "POST"])
 def checktag():
+    time.sleep(2)
     db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
 
     uid = None
