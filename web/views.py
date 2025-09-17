@@ -11,7 +11,7 @@ from decimal import Decimal
 import os
 import sqlite3
 
-db_name = "X:\\Scripts\\NFCServer\\web\\warehouse.db"
+db_name = "/home/warehouse/NFC_Server/AssetTracker"
 jobs = []
 locale.setlocale(locale.LC_ALL, '')
 views = Blueprint('views', __name__)
@@ -50,7 +50,7 @@ def reportIssue():
 
 @views.route("/checktag", methods=["GET", "POST"])
 def checktag():
-    db_name = "X:\\Scripts\\NFCServer\\web\\warehouse.db"
+    db_name = "/home/warehouse/NFC_Server/AssetTracker"
 
     uid = None
 

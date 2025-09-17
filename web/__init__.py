@@ -24,7 +24,7 @@ def CreateApp():
     if DB_TYPE == "sqlite":
         CreateTable()
         # Local SQLite file
-        DB_NAME = os.getenv("DB_NAME", "X:\\Scripts\\NFCServer\\web\\warehouse.db")
+        DB_NAME = os.getenv("DB_NAME", "/home/warehouse/NFC_Server/AssetTracker")
         app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
 
     elif DB_TYPE == "mysql":
