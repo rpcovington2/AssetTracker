@@ -93,6 +93,7 @@ def new_tag_form():
 
 @views.route("/submit_tag", methods=["POST"])
 def new_record():
+    print("Record adding...")
     db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
     data = request.get_json()
     print(data)
