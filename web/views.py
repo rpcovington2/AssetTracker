@@ -61,6 +61,7 @@ def checktag():
         uid = request.args.get("uid")
 
     if not uid:
+        print("UID missing")
         return jsonify({"error": "UID missing"}), 400
 
     conn = sqlite3.connect(db_name)
@@ -96,10 +97,12 @@ def new_record():
     data = request.get_json()
     print(data)
     if not data:
+        print("No JSON provided")
         return jsonify({"error": "No JSON provided"}), 400
 
     # Basic validation
     if not data.get("name") or not data.get("email"):
+        print("Name and Email are required")
         return jsonify({"error": "Name and Email are required"}), 400
 
     try:
