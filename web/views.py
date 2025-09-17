@@ -11,7 +11,7 @@ from decimal import Decimal
 import os
 import sqlite3
 
-db_name = "/home/warehouse/NFC_Server/AssetTracker"
+db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
 jobs = []
 locale.setlocale(locale.LC_ALL, '')
 views = Blueprint('views', __name__)
@@ -50,7 +50,7 @@ def reportIssue():
 
 @views.route("/checktag", methods=["GET", "POST"])
 def checktag():
-    db_name = "/home/warehouse/NFC_Server/AssetTracker"
+    db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
 
     uid = None
 
@@ -92,7 +92,7 @@ def new_tag_form():
 
 @views.route("/submit_tag", methods=["POST"])
 def new_record():
-    db_name = "X:\\Scripts\\NFCServer\\web\\warehouse.db"
+    db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
     data = request.get_json()
     print(data)
     if not data:
@@ -129,7 +129,7 @@ def new_record():
 
 @views.route("/api/assets", methods=["GET"])
 def list_assets():
-    db_name = "X:\\Scripts\\NFCServer\\web\\warehouse.db"
+    db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
     cur.execute("SELECT asset_id, name, type, status, location_id, notes FROM assets ORDER BY status DESC")
