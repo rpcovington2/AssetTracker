@@ -52,7 +52,6 @@ def reportIssue():
 
 @views.route("/checktag", methods=["GET", "POST"])
 def checktag():
-    time.sleep(2)
     db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
 
     uid = None
@@ -127,6 +126,7 @@ def new_record():
         ))
         conn.commit()
         conn.close()
+        time.sleep(2)
         return jsonify({"message": "Record saved successfully"}), 201
     except Exception as e:
         print(e)
