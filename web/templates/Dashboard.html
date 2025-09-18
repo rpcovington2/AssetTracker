@@ -31,6 +31,7 @@
         <thead class="bg-gray-200 text-gray-700 uppercase text-xs">
           <tr>
             <th class="px-4 py-3 text-left">ID</th>
+            <th class="px-4 py-3 text-left">Image</th>
             <th class="px-4 py-3 text-left">Name</th>
             <th class="px-4 py-3 text-left">Category</th>
             <th class="px-4 py-3 text-left">Status</th>
@@ -47,7 +48,7 @@
   <!-- JS: Load JSON from API and render -->
   <script>
     async function loadAssets() {
-      const response = await fetch("{{ url_for('views.list_assets') }}");
+      const response = await fetch("{{ url_for('api_assets') }}");
       const assets = await response.json();
       const tableBody = document.getElementById("assetTable");
       tableBody.innerHTML = ""; // clear before inserting
@@ -57,6 +58,9 @@
         row.classList.add("hover:bg-blue-50");
         row.innerHTML = `
           <td class="px-4 py-3">${asset.id}</td>
+          <td class="px-4 py-3">
+            ${asset.image_url ? `<img src="${asset.image_url}" alt="${asset.name}" class="h-12 w-12 object-cover rounded-md shadow"/>` : `<span class="text-gray-400">No Image</span>`}
+          </td>
           <td class="px-4 py-3">${asset.name}</td>
           <td class="px-4 py-3">${asset.category}</td>
           <td class="px-4 py-3 ${asset.status === 'Available' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}">
