@@ -47,7 +47,7 @@
   <!-- JS: Load JSON from API and render -->
   <script>
     async function loadAssets() {
-      const response = await fetch("{{ url_for('api_assets') }}");
+      const response = await fetch("{{ url_for('views.list_assets') }}");
       const assets = await response.json();
       const tableBody = document.getElementById("assetTable");
       tableBody.innerHTML = ""; // clear before inserting
