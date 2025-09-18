@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asset Tracker (NFC Reader)</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Asset Tracker</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -38,37 +38,47 @@
           </tr>
         </thead>
         <tbody id="assetTable" class="divide-y divide-gray-100">
-          <!-- Example row (replace with DB data loop in backend) -->
-          <tr class="hover:bg-blue-50">
-            <td class="px-4 py-3">001</td>
-            <td class="px-4 py-3">Laptop</td>
-            <td class="px-4 py-3">Electronics</td>
-            <td class="px-4 py-3 text-green-600 font-medium">Available</td>
-            <td class="px-4 py-3">2025-09-15</td>
-          </tr>
-          <tr class="hover:bg-blue-50">
-            <td class="px-4 py-3">002</td>
-            <td class="px-4 py-3">Projector</td>
-            <td class="px-4 py-3">Electronics</td>
-            <td class="px-4 py-3 text-red-600 font-medium">Checked Out</td>
-            <td class="px-4 py-3">2025-09-10</td>
-          </tr>
+          <!-- Filled dynamically -->
         </tbody>
       </table>
     </div>
   </main>
 
-  <!-- Small JS for filtering -->
+  <!-- JS: Load JSON from API and render -->
   <script>
-    const searchBox = document.getElementById('searchBox');
-    const tableRows = document.querySelectorAll('#assetTable tr');
+    async function loadAssets() {
+      const response = await fetch("{{ url_for('api_assets') }}");
+      const assets = await response.json();
+      const tableBody = document.getElementById("assetTable");
+      tableBody.innerHTML = ""; // clear before inserting
 
+      assets.forEach(asset => {
+        const row = document.createElement("tr");
+        row.classList.add("hover:bg-blue-50");
+        row.innerHTML = `
+          <td class="px-4 py-3">${asset.id}</td>
+          <td class="px-4 py-3">${asset.name}</td>
+          <td class="px-4 py-3">${asset.category}</td>
+          <td class="px-4 py-3 ${asset.status === 'Available' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}">
+            ${asset.status}
+          </td>
+          <td class="px-4 py-3">${asset.last_updated}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Search filter
+    const searchBox = document.getElementById('searchBox');
     searchBox.addEventListener('keyup', function() {
       const query = this.value.toLowerCase();
-      tableRows.forEach(row => {
+      document.querySelectorAll('#assetTable tr').forEach(row => {
         row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
       });
     });
+
+    // Load on page start
+    loadAssets();
   </script>
 </body>
 </html>
