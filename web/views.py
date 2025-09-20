@@ -156,3 +156,49 @@ def list_assets():
     ]
     return jsonify(assets)
 
+@views.route("/api/Routing", methods=["GET"])
+def job_routing():
+    db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
+    conn = sqlite3.connect(db_name)
+    cur = conn.cursor()
+    cur.execute("SELECT asset_id, name, type, status, location_id, notes FROM assets ORDER BY status DESC")
+    rows = cur.fetchall()
+    conn.close()
+
+    assets = [
+        {
+            "id": r[0],
+            "name": r[1],
+            "category": r[2],
+            "serial": r[3],
+            "location": r[4],
+            "notes": r[5],
+        }
+        for r in rows
+    ]
+    return jsonify(assets)
+
+@views.route("/job", methods=["GET"])
+def job_create():
+    db_name = "/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"
+    conn = sqlite3.connect(db_name)
+    # cur = conn.cursor()
+    # cur.execute("SELECT asset_id, name, type, status, location_id, notes FROM assets ORDER BY status DESC")
+    # rows = cur.fetchall()
+    # conn.close()
+    #
+    # assets = [
+    #     {
+    #         "id": r[0],
+    #         "name": r[1],
+    #         "category": r[2],
+    #         "serial": r[3],
+    #         "location": r[4],
+    #         "notes": r[5],
+    #     }
+    #     for r in rows
+    # ]
+    # return jsonify(assets)
+
+    return render_template("JobRouting.html")
+

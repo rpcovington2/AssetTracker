@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Job Book — Planning UI (API Demo)</title>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, Arial; margin: 18px; color: #0b0b0b; }
+    header { display:flex; align-items:center; gap:16px; margin-bottom:18px }
+    h1 { font-size:20px; margin:0 }
+    .panel { border:1px solid #e6e6e6; padding:12px; border-radius:8px; margin-bottom:12px }
+    label { display:block; margin-top:8px; font-weight:600 }
+    input, select, textarea { width:100%; padding:8px; margin-top:4px; box-sizing:border-box }
+    button { padding:8px 12px; border-radius:6px; border:0; background:#0f62fe; color:white; cursor:pointer }
+    .muted { color:#666; font-size:13px }
+    .row { display:flex; gap:12px }
+    .col { flex:1 }
+    pre { background:#f7f7f8; padding:8px; border-radius:6px; overflow:auto }
+    ul { padding-left:20px }
+    .small { font-size:13px }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Job Book Planning — HTML Demo</h1>
+    <div class="muted">Client-side UI that demonstrates API calls for planning routings & workorders</div>
+  </header>
+
+  <div class="panel">
+    <strong>Server base URL</strong>
+    <input id="baseUrl" placeholder="https://dev.example.com" value="http://localhost:8000" />
+    <div class="muted small">Set this to your API server. All fetch calls use this base URL.</div>
+  </div>
+
+  <div class="panel">
+    <h3>Create Routing Template</h3>
+    <div class="row">
+      <div class="col">
+        <label>Part ID (existing part)</label>
+        <input id="routing_part_id" placeholder="uuid or part SKU" />
+        <label>Routing Name</label>
+        <input id="routing_name" placeholder="Harness Build Rev A" />
+        <label>Revision</label>
+        <input id="routing_rev" value="A" />
+      </div>
+      <div class="col">
+        <label>Steps JSON (array of steps)</label>
+        <textarea id="routing_steps" rows="10">[
+  { "step_number": 1, "operation_name": "Cut Wires", "workcenter": "Bench_01", "machine": "Cutter_3000", "operator": "user-uuid-1", "instructions": "Cut wires to lengths per BOM", "est_time_minutes": 5, "inspection_required": false },
+  { "step_number": 2, "operation_name": "Crimp Terminals", "workcenter": "CrimpStation_01", "machine": "CrimpTool_XY", "operator": "user-uuid-2", "instructions": "Crimp terminals per tool setup", "est_time_minutes": 8, "inspection_required": true },
+  { "step_number": 3, "operation_name": "Assemble Connector", "workcenter": "Assembly_01", "machine": "AssemblyBench_A", "operator": "user-uuid-3", "instructions": "Follow connector pinout diagram", "est_time_minutes": 6, "inspection_required": true }
+]</textarea>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button onclick="createRouting()">Create Routing</button>
+      <span id="createRoutingResult" class="muted small" style="margin-left:8px"></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Create Work Order (attaches routing)</h3>
+    <label>WO Number</label>
+    <input id="wo_number" placeholder="WO-1001" />
+    <label>Part ID</label>
+    <input id="wo_part_id" placeholder="uuid or SKU" />
+    <div class="row">
+      <div class="col">
+        <label>Qty</label>
+        <input id="wo_qty" type="number" value="10" />
+      </div>
+      <div class="col">
+        <label>Routing Template ID</label>
+        <input id="wo_routing_id" placeholder="paste routing id from response" />
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button onclick="createWorkorder()">Create Work Order</button>
+      <span id="createWORslt" class="muted small" style="margin-left:8px"></span>
+    </div>
+
+    <hr />
+    <h4>Schedule / Assign</h4>
+    <label>Work Order ID</label>
+    <input id="sched_workorder_id" placeholder="workorder uuid" />
+    <div class="row">
+      <div class="col">
+        <label>Scheduled Start (ISO)</label>
+        <input id="sched_start" placeholder="2025-09-20T08:00:00Z" />
+      </div>
+      <div class="col">
+        <label>Scheduled End (ISO)</label>
+        <input id="sched_end" placeholder="2025-09-20T12:00:00Z" />
+      </div>
+    </div>
+    <label>Assign To Operator (user id)</label>
+    <input id="sched_assign_to" placeholder="operator user id" />
+    <label>Assign To Machine (machine id)</label>
+    <input id="sched_assign_machine" placeholder="machine id" />
+    <div style="margin-top:10px">
+      <button onclick="scheduleWorkorder()">Save Schedule & Assign</button>
+      <span id="scheduleResult" class="muted small" style="margin-left:8px"></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Explorer — Read data from API</h3>
+    <div class="row">
+      <div class="col">
+        <button onclick="listParts()">List Parts</button>
+        <button onclick="listRoutings()">List Routings</button>
+        <button onclick="listWorkorders()">List Work Orders</button>
+      </div>
+      <div class="col">
+        <label>Response (JSON)</label>
+        <pre id="apiResponse">{}</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function base() { return document.getElementById('baseUrl').value.replace(/\/$/, '') }
+
+    async function doFetch(path, opts = {}){
+      const url = base() + path
+      try{
+        const res = await fetch(url, Object.assign({headers: { 'Content-Type': 'application/json' }}, opts))
+        const text = await res.text()
+        try { return {status: res.status, ok: res.ok, json: JSON.parse(text)} }
+        catch(e){ return {status: res.status, ok: res.ok, text} }
+      } catch(err){ return {status:0, ok:false, error: String(err)} }
+    }
+
+    // --- Create Routing Template ---
+    async function createRouting(){
+      const part_id = document.getElementById('routing_part_id').value
+      const name = document.getElementById('routing_name').value
+      const rev = document.getElementById('routing_rev').value
+      let steps
+      try{ steps = JSON.parse(document.getElementById('routing_steps').value) } catch(e){ alert('Steps JSON invalid'); return }
+
+      const payload = { part_id, name, revision: rev, steps }
+      const r = await doFetch('/api/routings', { method: 'POST', body: JSON.stringify(payload) })
+      document.getElementById('createRoutingResult').textContent = r.ok ? 'Created routing id: ' + (r.json.id || 'n/a') : ('Error: ' + (r.text||r.error||r.status))
+      document.getElementById('apiResponse').textContent = JSON.stringify(r, null, 2)
+    }
+
+    // --- Create Workorder ---
+    async function createWorkorder(){
+      const payload = {
+        wo_number: document.getElementById('wo_number').value,
+        part_id: document.getElementById('wo_part_id').value,
+        qty: parseInt(document.getElementById('wo_qty').value || '1', 10),
+        routing_id: document.getElementById('wo_routing_id').value
+      }
+      const r = await doFetch('/api/workorders', { method: 'POST', body: JSON.stringify(payload) })
+      document.getElementById('createWORslt').textContent = r.ok ? 'WO created: ' + (r.json.id || r.json.wo_number || '') : ('Error: ' + (r.text||r.error||r.status))
+      document.getElementById('apiResponse').textContent = JSON.stringify(r, null, 2)
+    }
+
+    // --- Schedule & Assign workorder ---
+    async function scheduleWorkorder(){
+      const id = document.getElementById('sched_workorder_id').value
+      if(!id){ alert('Workorder ID required'); return }
+      const payload = {
+        scheduled_start: document.getElementById('sched_start').value,
+        scheduled_end: document.getElementById('sched_end').value,
+        assigned_to: document.getElementById('sched_assign_to').value,
+        assigned_machine: document.getElementById('sched_assign_machine').value
+      }
+      // Example: PATCH /api/workorders/:id
+      const r = await doFetch('/api/workorders/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(payload) })
+      document.getElementById('scheduleResult').textContent = r.ok ? 'Scheduled' : ('Error: ' + (r.text||r.error||r.status))
+      document.getElementById('apiResponse').textContent = JSON.stringify(r, null, 2)
+    }
+
+    // --- Explorer methods ---
+    async function listParts(){ const r = await doFetch('/api/parts'); document.getElementById('apiResponse').textContent = JSON.stringify(r, null, 2) }
+    async function listRoutings(){ const r = await doFetch('/api/routings'); document.getElementById('apiResponse').textContent = JSON.stringify(r, null, 2) }
+    async function listWorkorders(){ const r = await doFetch('/api/workorders'); document.getElementById('apiResponse').textContent = JSON.stringify(r, null, 2) }
+
+    // --- Helpful snippets for backend ---
+    window.examplePayloads = {
+      createRouting: {
+        part_id: "uuid-or-sku",
+        name: "Harness Build Rev A",
+        revision: "A",
+        steps: [ { step_number:1, operation_name:'Cut Wires', workcenter:'Bench_01', machine:'Cutter_3000', operator:'user-uuid-1', instructions:'Cut...', est_time_minutes:5, inspection_required:false } ]
+      },
+      createWorkorder: { wo_number:'WO-1001', part_id:'uuid-or-sku', qty:10, routing_id:'uuid-of-routing' },
+      patchWorkorderSchedule: { scheduled_start:'2025-09-20T08:00:00Z', scheduled_end:'2025-09-20T12:00:00Z', assigned_to:'user-uuid', assigned_machine:'machine-uuid' }
+    }
+
+  </script>
+
+  <footer class="muted small" style="margin-top:16px">Notes: This is a demo static HTML file. Adapt API paths & payloads to match your backend (example paths: POST /api/routings, POST /api/workorders, PATCH /api/workorders/:id). Add authentication headers (Authorization: Bearer &lt;token&gt;) to doFetch when your API requires auth.</footer>
+</body>
+</html>
