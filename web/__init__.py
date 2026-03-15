@@ -10,8 +10,8 @@ import sqlite3
 db = SQLAlchemy()
 
 def CreateApp():
-    DB_USER = os.getenv("DB_USER", "rpcovington")
-    DB_PASSWORD = os.getenv("DB_PASSWORD", "Heather21!")
+    DB_USER = os.getenv("DB_USER", "User1")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "Test1")
     DB_SERVER = os.getenv("DB_SERVER", "192.168.68.156")
     DB_PORT = os.getenv("DB_PORT", "3306")
     DB_NAME = os.getenv("DB_NAME", "Personaldb")
@@ -24,7 +24,7 @@ def CreateApp():
     if DB_TYPE == "sqlite":
         CreateTable()
         # Local SQLite file
-        DB_NAME = os.getenv("DB_NAME", "/home/warehouse/NFC_Server/AssetTracker")
+        DB_NAME = os.getenv("DB_NAME", "AssetTracker")
         app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
 
     elif DB_TYPE == "mysql":
@@ -79,10 +79,10 @@ def CreateApp():
 
 def Install():
     """TODO: Build Out a """
-    run(f"pip3 install -r C:\\Users\\rpcov\\PycharmProjects\\InventoryManagment\\requirements.txt")
+    run(f"pip3 install -r requirements.txt")
 
 
-def CreateTable(db_name="/home/warehouse/NFC_Server/AssetTracker/web/warehouse.db"):
+def CreateTable(db_name="warehouse.db"):
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
     # Table: General assets (machines, tools, etc.)
