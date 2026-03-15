@@ -1,9 +1,10 @@
 from web import db
 from flask_login import UserMixin
 from flask_wtf import FlaskForm
-#from wtforms import *
-#from wtforms.validators import DataRequired, Length, NumberRange, Optional
-#from wtforms.widgets import TextArea
+from wtforms import *
+from wtforms.validators import DataRequired, Length, NumberRange, Optional
+
+from wtforms.widgets import TextArea
 from datetime import datetime
 
 
