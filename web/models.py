@@ -100,3 +100,13 @@ class IssueForm(FlaskForm):
     Active = SelectField(u'Priority', choices=[('High'), ('Medium'), ('Low')])
     submit = SubmitField('Add')
 
+class AssetForm(FlaskForm):
+    asset_id = StringField('Asset ID', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    type = StringField('Type')
+    location = StringField('Location')
+    status = StringField('Status')
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Save Asset')
+
+
