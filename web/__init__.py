@@ -3,50 +3,65 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from subprocess import run
 import os
-import sqlite3
-# from flask_wtf.csrf import CSRFProtect
-
 
 db = SQLAlchemy()
 
 def CreateApp():
-    DB_USER = os.getenv("DB_USER", "User1")
-    DB_PASSWORD = os.getenv("DB_PASSWORD", "Test1")
-    DB_SERVER = os.getenv("DB_SERVER", "192.168.68.156")
-    DB_PORT = os.getenv("DB_PORT", "3306")
-    DB_NAME = os.getenv("DB_NAME", "Personaldb")
-
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = "TasfafahhkhistemporaasdayUntilsetupinConfigFile12345678901"
+    app.config['SECRET_KEY'] = os.getenv(
+        "SECRET_KEY",
+        "replace_this_with_a_real_secret"
+    )
+
     # === Database Config ===
-    DB_TYPE = os.getenv("DB_TYPE", "sqlite")  # sqlite | mysql | mssql
+    DB_TYPE = os.getenv("DB_TYPE", "sqlite")  # sqlite | mysql | mssql | postgres
 
     if DB_TYPE == "sqlite":
-        CreateTable()
-        # Local SQLite file
-        DB_NAME = os.getenv("DB_NAME", "AssetTracker")
+        DB_NAME = os.getenv("DB_NAME", "AssetTracker.db")
         app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
 
     elif DB_TYPE == "mysql":
-        # MySQL / MariaDB
+        DB_USER = os.getenv("DB_USER", "User1")
+        DB_PASSWORD = os.getenv("DB_PASSWORD", "Test1")
+        DB_SERVER = os.getenv("DB_HOST", "localhost")
+        DB_PORT = os.getenv("DB_PORT", "3306")
+        DB_NAME = os.getenv("DB_NAME", "Personaldb")
+
         app.config["SQLALCHEMY_DATABASE_URI"] = (
             f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}:{DB_PORT}/{DB_NAME}"
         )
 
     elif DB_TYPE == "mssql":
-        # Microsoft SQL Server (requires `pyodbc`)
         DB_USER = os.getenv("DB_USER", "sa")
         DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-        DB_SERVER = os.getenv("DB_SERVER", "localhost")
+        DB_SERVER = os.getenv("DB_HOST", "localhost")
         DB_PORT = os.getenv("DB_PORT", "1433")
         DB_NAME = os.getenv("DB_NAME", "flaskdb")
         DRIVER = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
+
         app.config["SQLALCHEMY_DATABASE_URI"] = (
             f"mssql+pyodbc://{DB_USER}:{DB_PASSWORD}@{DB_SERVER},{DB_PORT}/{DB_NAME}"
             f"?driver={DRIVER.replace(' ', '+')}"
         )
 
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    elif DB_TYPE == "postgres":
+        DB_USER = os.getenv("DB_USER", "assetuser")
+        DB_PASSWORD = os.getenv("DB_PASSWORD", "change_me_now")
+        DB_SERVER = os.getenv("DB_HOST", "db")
+        DB_PORT = os.getenv("DB_PORT", "5432")
+        DB_NAME = os.getenv("DB_NAME", "assettracker")
+
+        app.config["SQLALCHEMY_DATABASE_URI"] = (
+            f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}:{DB_PORT}/{DB_NAME}"
+        )
+
+    else:
+        raise ValueError(f"Unsupported DB_TYPE: {DB_TYPE}")
+
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_pre_ping": True
+    }
 
     @app.after_request
     def add_header(response):
@@ -54,34 +69,31 @@ def CreateApp():
         response.headers['Content-Security-Policy'] = "frame-ancestors *"
         return response
 
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(user_id)
-
     db.init_app(app)
 
+    from web.models import User
     from web.views import views
     from web.auth import auth
 
     app.register_blueprint(views)
     app.register_blueprint(auth)
 
-    from web.models import User
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
 
-    # csrf = CSRFProtect(app)
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    with app.app_context():
+        db.create_all()
 
     return app
 
 
 def Install():
-    """TODO: Build Out a """
-    run(f"pip3 install -r requirements.txt")
-
-
+    run("pip3 install -r requirements.txt", shell=True)
 def CreateTable(db_name="warehouse.db"):
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
