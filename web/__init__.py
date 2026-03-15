@@ -14,7 +14,7 @@ def CreateApp():
     )
 
     # === Database Config ===
-    DB_TYPE = os.getenv("DB_TYPE", "sqlite")  # sqlite | mysql | mssql | postgres
+    DB_TYPE = os.getenv("DB_TYPE", "postgres")  # sqlite | mysql | mssql | postgres
 
     if DB_TYPE == "sqlite":
         DB_NAME = os.getenv("DB_NAME", "AssetTracker.db")
@@ -71,7 +71,7 @@ def CreateApp():
 
     db.init_app(app)
 
-    from web.models import User
+    from web.models import User, Transaction, Asset
     from web.views import views
     from web.auth import auth
 
