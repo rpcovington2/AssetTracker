@@ -1,10 +1,9 @@
 from web import db
 from flask_login import UserMixin
 from flask_wtf import FlaskForm
-from wtforms import *
-from wtforms.validators import DataRequired, Length, NumberRange, Optional
-from wtforms.widgets import TextArea
-from flask_login import UserMixin
+#from wtforms import *
+#from wtforms.validators import DataRequired, Length, NumberRange, Optional
+#from wtforms.widgets import TextArea
 from datetime import datetime
 
 
@@ -14,14 +13,13 @@ class User(db.Model, UserMixin):
     Username = db.Column(db.String(45), index=False, unique=True, nullable=False)
     FirstName = db.Column(db.String(80))
     LastName = db.Column(db.String(80))
-    Username = db.Column(db.String(80))
     Email = db.Column(db.String(255))
     password = db.Column(db.String(45))
     Role = db.Column(db.String(45))
 
 
 class Transaction(db.Model):
-    __tablename__ = 'Transactions'
+    __tablename__ = 'transactions'
     id = db.Column(db.Integer, primary_key=True)
     # Name = db.Column(db.String(1000))
     AccountFrom = db.Column(db.String(1000))
@@ -32,6 +30,19 @@ class Transaction(db.Model):
     Comment = db.Column(db.String(1000))
     Type = db.Column(db.String(1000))
 
+class Asset(db.Model):
+    __tablename__ = 'assets'
+
+    id = db.Column(db.Integer, primary_key=True)
+    asset_id = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    name = db.Column(db.String(255), nullable=False)
+    type = db.Column(db.String(100))
+    location = db.Column(db.String(255))
+    status = db.Column(db.String(50), default='available')
+    notes = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"<Asset {self.asset_id} - {self.name}>"
 
 #    ALL FORMS USED IN WEB APP
 class IncomeForm(FlaskForm):
